@@ -1,19 +1,15 @@
 {
-  "name": "bootstrap5-webpack-boilerplate",
+  "name": "started-bootstrap5-webpack",
   "version": "1.0.1",
-  "description": "A simple boilerplate using Bootstrap 5, Webpack and Babel.",
+  "description": "",
   "main": "index.js",
   "scripts": {
     "build": "webpack --config webpack.config.js --mode production",
     "dev": "webpack --config webpack.config.js --mode development --watch",
     "start": "webpack-dev-server --port 8080"
   },
-  "author": "Dominik Hanke",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/noreading/bootstrap5-webpack-boilerplate.git"
-  },
+  "author": "",
+  "license": "",
   "devDependencies": {
     "@babel/core": "^7.15.0",
     "@popperjs/core": "^2.9.2",
