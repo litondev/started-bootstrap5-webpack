@@ -1,52 +1,100 @@
 // const webpack = require("webpack");
 const path = require("path");
+const fs = require('fs');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const LayoutWebpackPlugin = require('layout-webpack-html-plugin');
 
-module.exports = {
-    mode : 'development',
+// const mode = process.argv[process.argv.findIndex(arg => arg == "--mode") + 1];
+
+const pagesFolder = __dirname+'/src/pages/';
+var hbsPages = [];
+var files = fs.readdirSync(pagesFolder);
+
+files.forEach(file => {
+    if(!fs.lstatSync(pagesFolder + file).isFile()) return;
     
-    // Define the entry points of our application (can be multiple for different sections of a website)
+    if(!path.extname(pagesFolder + file) == ".hbs") return;      
+
+    hbsPages.push(new HtmlWebpackPlugin({
+      title: path.parse(pagesFolder + file).name,
+      template: "src/pages/"+file,
+      filename:  path.parse(pagesFolder + file).name + ".html",
+      minify: false
+    }));
+});
+
+module.exports = {    
+   
     entry: {
         main: './src/js/main.js',
     },
-    stats: {warnings:false},
+
+    stats: {
+        warnings: false,
+    },
+
     performance: {
         hints: false
-      },
-    // Define the destination directory and filenames of compiled resources
+    },
+
     output: {
         filename: "js/[name].js",
         path: path.resolve(__dirname, "./dist")
     },
 
-    // Define development options
     devtool: "source-map",
 
-    // Define loaders
     module: {
         rules: [
-            // Use babel for JS files
+
+            {
+                test: /\.hbs$/,
+                loader: "handlebars-loader",
+                options: {
+                    inlineRequires: "/assets/",                    
+                },
+            },
+
+            { 
+                test: /\.(jpe?g|png|gif|svg)$/i, 
+                use: [{
+                    loader: 'file-loader',
+                    options: {
+                    name: '[path][name].[ext]',
+                    esModule: false,
+                    }
+                  }],
+            },
+
+            {
+                test: /\/assets\/vendors\//i, 
+                use: [{
+                    loader: 'file-loader',
+                    options: {
+                    name: '[path][name].[ext]',
+                    esModule: false,
+                    }
+                  }],
+            },
+
             {
                 test: /\.js$/,
                 exclude: /(node_modules)/,
                 use: {
                     loader: "babel-loader",                
                 }
-            },
-            
-            // CSS, PostCSS, and Sass
+            },                    
+
             {
-                test: /\.(scss|css)$/,
+                test: /\.(scss|.css)$/,
                 use: [
-                    MiniCssExtractPlugin.loader,
+                    MiniCssExtractPlugin.loader,                  
                     {
                         loader: "css-loader",
                         options: {
                             importLoaders: 2,
                             sourceMap: true,
-                            url: false,
+                            url: true,
                         }
                     },
                     {
@@ -63,56 +111,39 @@ module.exports = {
                 ],
             },
 
-            {
-                test: /\.hbs$/,
-                loader: "handlebars-loader",
-                options: {
-                  inlineRequires: "/images/"
-                }
-              },
-              {
-                test: /\.(png|svg|jpg|jpeg|gif)$/i,
-                type: "asset/resource"
-              }
         ],
     },
 
-    // Define used plugins
-    plugins: [      
-        // Extracts CSS into separate files
+    plugins: [
         new MiniCssExtractPlugin({
             filename: "css/[name].css",
             chunkFilename: "[id].css"
-        }),          
-
-        new HtmlWebpackPlugin({
-            title: "Home",
-            template: "src/pages/home.hbs",
-            filename: "index.html"
-        }),
-        new HtmlWebpackPlugin({
-            title: "About",
-            template: "src/pages/about.hbs",
-            filename: "about.html"
-        })
+        }),    
+        ...hbsPages
     ],
 
     optimization: {
-        runtimeChunk: 'single',
+        runtimeChunk: false,
         splitChunks: {
-          chunks: 'all',
-          maxInitialRequests: Infinity,
-          minSize: 0,
-          cacheGroups: {
+          chunks: 'all',         
+          cacheGroups: {            
+            styles: {
+                name(module){
+                    try{
+                        let packageName = module._identifier.split("!");                    
+                        return path.parse(packageName[packageName.length-1]).name;
+                    }catch(e){
+                        return module;
+                    }
+                },
+                test: /\.s?css$/,           
+            },
             vendor: {
               test: /[\\/]node_modules[\\/]/,
               name(module) {
-                // get the name. E.g. node_modules/packageName/not/this/part.js
-                // or node_modules/packageName
                 const packageName = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/)[1];
       
-                // npm package names are URL-safe, but some servers don't like @ symbols
-                return `npm.${packageName.replace('@', '')}`;
+                return `${packageName.replace('@', '')}`;
               },
             },
           },

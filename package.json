@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "webpack --config webpack.config.js --mode production",
-    "dev": "webpack --config webpack.config.js --mode development --watch",
-    "start": "webpack-dev-server --port 8080"
+    "dev": "webpack-dev-server --mode development --port 9000"
   },
   "author": "",
   "license": "",
@@ -37,6 +36,7 @@
     "webpack-cli": "^4.8.0"
   },
   "dependencies": {
+    "file-loader": "^6.2.0",
     "handlebars": "^4.7.7",
     "handlebars-loader": "^1.7.1",
     "webpack-dev-server": "^4.7.1"

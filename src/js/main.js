@@ -1,8 +1,6 @@
-// Load Bootstrap JS
-import bootstrap from 'bootstrap'
+// Load Bootstrap
+import 'bootstrap'; // JS 
+import '../scss/bootstrap.scss';
 
-// Load Styles
+// Load Main Scss
 import '../scss/main.scss';
-
-// App code
-console.log(`Hello`);
